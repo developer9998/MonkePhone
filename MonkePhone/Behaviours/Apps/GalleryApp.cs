@@ -1,0 +1,147 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using MonkePhone.Behaviours.UI;
+using MonkePhone.Extensions;
+using MonkePhone.Models;
+using MonkePhone.Tools;
+using MonkePhone.Utilities;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
+
+namespace MonkePhone.Behaviours.Apps
+{
+    public class GalleryApp : PhoneApp
+    {
+        public override string AppId => "Gallery";
+
+        public Dictionary<string, string> _photoComparison;
+        public int _currentPhoto;
+
+        public Image _galleryPhoto;
+        public Text _galleryText, _gallerySelection, _galleryWarning;
+        private GameObject _deleteButton, _uploadButton;
+
+        public List<Photo> RelativePhotos = [];
+
+        public override void Initialize()
+        {
+            _galleryPhoto = transform.Find("Preview").GetComponent<Image>();
+            _galleryText = transform.Find("Photo Label").GetComponent<Text>();
+            _gallerySelection = transform.Find("Preview/Text (Legacy)").GetComponent<Text>();
+            _galleryWarning = transform.Find("Header (1)").GetComponent<Text>();
+            _deleteButton = transform.Find("Photos Trash").gameObject;
+            _uploadButton = transform.Find("Photos Post").gameObject;
+        }
+
+        public override void AppOpened()
+        {
+            bool initialized = _photoComparison != null;
+
+            _photoComparison = Directory.GetFiles(PhoneHandler.Instance.PhotosPath).Where(file => file.EndsWith(".png") || file.EndsWith(".jpg") || file.EndsWith(".jpeg") || file.EndsWith(".gif")).ToDictionary(photo => photo, photo => Path.GetFileName((photo)));
+
+            if (!initialized)
+            {
+                _currentPhoto = _photoComparison.Count - 1;
+            }
+
+            RefreshApp();
+        }
+
+        public override void ButtonClick(PhoneUIObject phoneUIObject, bool isLeftHand)
+        {
+            switch (phoneUIObject.name)
+            {
+                case "Photos Last":
+
+                    _currentPhoto--;
+
+                    RefreshApp();
+
+                    break;
+
+                case "Photos Next":
+
+                    _currentPhoto++;
+
+                    RefreshApp();
+
+                    break;
+
+                case "Photos Trash":
+
+                    if (_photoComparison.Count == 0)
+                    {
+                        return;
+                    }
+
+                    var path = Path.Combine(Path.Combine(PhoneHandler.Instance.PhotosPath, _photoComparison.ElementAt(_currentPhoto).Value));
+
+                    try
+                    {
+                        if (!FileEx.RecycleFile(path))
+                            File.Delete(path);
+                    }
+                    catch
+                    {
+                        File.Delete(path);
+                    }
+
+                    _photoComparison.Remove(_photoComparison.ElementAt(_currentPhoto).Key);
+                    _currentPhoto--;
+
+                    PlaySound("Delete", 0.66f);
+
+                    RefreshApp();
+
+                    break;
+            }
+        }
+
+        public void RefreshApp()
+        {
+            try
+            {
+                _galleryWarning.enabled = _photoComparison.Count == 0;
+                if (_photoComparison.Count == 0)
+                {
+                    _galleryText.text = "";
+                    _galleryPhoto.enabled = false;
+                    _gallerySelection.text = "";
+                    _deleteButton.SetActive(false);
+                    _uploadButton.SetActive(true);
+                    return;
+                }
+
+                _currentPhoto = MathEx.Wrap(_currentPhoto, 0, _photoComparison.Count);
+
+                _deleteButton.SetActive(true);
+
+                var tex = new Texture2D(2, 2);
+                tex.LoadImage(File.ReadAllBytes(Path.Combine(PhoneHandler.Instance.PhotosPath, _photoComparison.ElementAt(_currentPhoto).Value)));
+                tex.Apply();
+                tex.filterMode = FilterMode.Point;
+
+                var fileName = Path.GetFileName(_photoComparison.ElementAt(_currentPhoto).Key);
+
+                _uploadButton.SetActive(RelativePhotos.Count > 0 && RelativePhotos.Any(photo => photo.Name == fileName));
+                _uploadButton.transform.Find("Image").GetComponent<Image>().color = Color.black;
+
+                _galleryText.text = $"{_currentPhoto + 1}/{_photoComparison.Count}";
+                _galleryPhoto.enabled = true;
+                _galleryPhoto.material.mainTexture = tex;
+                _gallerySelection.text = fileName;
+
+                Photo relativePhoto = RelativePhotos.Any() ? RelativePhotos.FirstOrDefault(photo => photo.Name == fileName) : null;
+
+                _uploadButton.SetActive(false);
+            }
+            catch (Exception ex)
+            {
+                Logging.Error($"Error when loading photos: {ex}");
+            }
+        }
+    }
+}
