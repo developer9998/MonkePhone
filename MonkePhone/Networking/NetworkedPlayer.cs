@@ -103,7 +103,7 @@ namespace MonkePhone.Networking
 
         private void OnLocalInvisibilityChanged(VRRig targetRig, bool isInvisible)
         {
-            if (targetRig is null || targetRig != Rig)
+            if (targetRig is null || Phone is null || targetRig != Rig)
                 return;
 
             Phone.SetActive(!isInvisible);
