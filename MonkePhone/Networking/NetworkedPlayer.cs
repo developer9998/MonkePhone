@@ -1,11 +1,13 @@
-﻿using System;
+﻿using MonkePhone.Behaviours;
+using MonkePhone.Interfaces;
+using MonkePhone.Models;
+using MonkePhone.Patches;
+using MonkePhone.Tools;
+using Photon.Realtime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MonkePhone.Interfaces;
-using MonkePhone.Models;
-using MonkePhone.Tools;
-using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -49,6 +51,7 @@ namespace MonkePhone.Networking
         public void Start()
         {
             NetworkHandler.Instance.OnPlayerPropertyChanged += OnPlayerPropertyChanged;
+            RigLocalInvisiblityPatch.OnSetInvisibleToLocalPlayer += OnLocalInvisibilityChanged;
 
             if (!HasMonkePhone && Owner is PunNetPlayer punPlayer && punPlayer.PlayerRef is Player playerRef)
                 NetworkHandler.Instance.OnPlayerPropertiesUpdate(playerRef, playerRef.CustomProperties);
@@ -57,6 +60,7 @@ namespace MonkePhone.Networking
         public void OnDestroy()
         {
             NetworkHandler.Instance.OnPlayerPropertyChanged -= OnPlayerPropertyChanged;
+            RigLocalInvisiblityPatch.OnSetInvisibleToLocalPlayer -= OnLocalInvisibilityChanged;
 
             if (HasMonkePhone)
             {
@@ -97,11 +101,18 @@ namespace MonkePhone.Networking
             }
         }
 
+        private void OnLocalInvisibilityChanged(VRRig targetRig, bool isInvisible)
+        {
+            if (targetRig is null || targetRig != Rig)
+                return;
+
+            Phone.SetActive(!isInvisible);
+        }
 
         public async Task CreateMonkePhone()
         {
             Phone = Instantiate(await AssetLoader.LoadAsset<GameObject>(Constants.NetPhoneName));
-
+            Phone.SetActive(!Rig.IsInvisibleToLocalPlayer);
             Phone.transform.localEulerAngles = Vector3.zero;
 
             _meshRenderer = Phone.transform.Find("Model").GetComponent<MeshRenderer>();

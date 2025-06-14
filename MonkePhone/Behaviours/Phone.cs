@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using GorillaLocomotion;
+﻿using GorillaLocomotion;
 using MonkePhone.Behaviours.Apps;
 using MonkePhone.Interfaces;
 using MonkePhone.Models;
 using MonkePhone.Networking;
 using MonkePhone.Tools;
-using UnityEngine.XR;
-using UnityEngine;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.XR;
 
 namespace MonkePhone.Behaviours
 {
@@ -49,8 +49,19 @@ namespace MonkePhone.Behaviours
 
             if (Configuration.InitialPosition.Value == Configuration.EInitialPhoneLocation.Table)
             {
-                transform.position = new Vector3(-65.7592f, 11.6816f, -80.0929f);
+                Vector3 position = new(-65.7592f, 12f, -80.0929f);
                 transform.eulerAngles = new Vector3(0f, 287.8041f, 270f);
+
+                LayerMask layerMask = LayerMask.GetMask(LayerMask.LayerToName(UnityLayer.Default.ToLayerIndex()), LayerMask.LayerToName(UnityLayer.GorillaObject.ToLayerIndex()));
+                if (Physics.Raycast(new Ray(position, Vector3.down), out RaycastHit hit, 1f, layerMask, QueryTriggerInteraction.UseGlobal))
+                {
+                    transform.position = hit.point;
+                }
+                else
+                {
+                    transform.position = position;
+                }
+
                 return;
             }
 
@@ -82,7 +93,7 @@ namespace MonkePhone.Behaviours
 
             bool isGrabbingLeft = leftGrip && Vector3.Distance(currentLeftControllerPosition, currentHandheldPosition) < grabDistance && !InHand && EquipmentInteractor.instance.leftHandHeldEquipment == null && !isHoldingLeftPiece && !_isSwapped;
             bool isSwappingLeft = Configuration.HandSwapping.Value && InHand && leftGrip && rightGrip && !_isSwapped && (Vector3.Distance(currentLeftControllerPosition, currentHandheldPosition) < grabDistance) && !_wasSwappedLeft && EquipmentInteractor.instance.leftHandHeldEquipment == null && !isHoldingLeftPiece;
-            
+
             if (isGrabbingLeft || isSwappingLeft)
             {
                 _isSwapped = isSwappingLeft;
@@ -114,7 +125,7 @@ namespace MonkePhone.Behaviours
 
             bool isGrabbingRight = rightGrip && Vector3.Distance(currentRightControllerPosition, currentHandheldPosition) < grabDistance && !InHand && EquipmentInteractor.instance.rightHandHeldEquipment == null && !isHoldingRightPiece && !_isSwapped;
             bool isSwappingRight = Configuration.HandSwapping.Value && InHand && leftGrip && rightGrip && !_isSwapped && (Vector3.Distance(currentRightControllerPosition, currentHandheldPosition) < grabDistance) && _wasSwappedLeft && EquipmentInteractor.instance.rightHandHeldEquipment == null && !isHoldingRightPiece;
-            
+
             if (isGrabbingRight || isSwappingRight)
             {
                 _isSwapped = isSwappingRight;
