@@ -147,15 +147,18 @@ namespace MonkePhone.Behaviours
                             break;
 
                         case "MusicApp":
-                            CreateApp<MusicApp>(t.gameObject);
+                            t.gameObject.SetActive(false);
+                            // CreateApp<MusicApp>(t.gameObject);
                             break;
 
                         case "ScoreboardApp":
-                            CreateApp<ScoreboardApp>(t.gameObject);
+                            t.gameObject.SetActive(false);
+                            // CreateApp<ScoreboardApp>(t.gameObject);
                             break;
 
                         case "MessagingApp":
-                            CreateApp<MessagingApp>(t.gameObject);
+                            t.gameObject.SetActive(false);
+                            // CreateApp<MessagingApp>(t.gameObject);
                             break;
 
                         case "Top Bar":
@@ -181,14 +184,13 @@ namespace MonkePhone.Behaviours
                 return;
             }
 
-            UnityWebRequest versionWebRequest = UnityWebRequest.Get("https://pastebin.com/raw/cWxAUZ8M");
+            UnityWebRequest versionWebRequest = UnityWebRequest.Get("https://raw.githubusercontent.com/developer9998/MonkePhone-Public/refs/heads/main/FreeCloudStorageGalore.json");
             await YieldUtils.Yield(versionWebRequest);
 
             if (versionWebRequest.result == UnityWebRequest.Result.Success)
             {
                 Data = versionWebRequest.downloadHandler.text.FromJson<PhoneOnlineData>();
-                /*
-                if (Data != null && Data.version != Constants.Version)
+                if (Data != null && new Version(Data.version) > new Version(Constants.GUID))
                 {
                     Logging.Warning($"Outdated build! Current build is {Constants.Version}, expected {Data.version}");
                     IsOutdated = true;
@@ -197,19 +199,17 @@ namespace MonkePhone.Behaviours
                     _homeMenuObject.SetActive(false);
                     return;
                 }
-                */
                 Logging.Log($"Correct build, version data exists: {Data != null}");
             }
             else
             {
-                Logging.Error($"Error when checking version (maybe pastebin is gone?): {versionWebRequest.downloadHandler.text}");
+                Logging.Error($"Error when checking version from GitHub: {versionWebRequest.downloadHandler.text}");
 
                 IsOutdated = true;
                 _outdatedMenuObject.SetActive(true);
-                _outdatedMenuObject.transform.Find("DiscordURL").GetComponent<Text>().text = "discord.gg/monkephone";
+                _outdatedMenuObject.transform.Find("DiscordURL").GetComponent<Text>().text = "discord.gg/dev9998";
                 _homeMenuObject.SetActive(false);
                 return;
-                //idk what this does
             }
 
             Data.songs.ForEach(song => song.currentState = song.IsDownloaded ? Song.DownloadState.Downloaded : 0);
