@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using MonkePhone.Behaviours.UI;
+﻿using MonkePhone.Behaviours.UI;
 using MonkePhone.Extensions;
 using MonkePhone.Models;
 using MonkePhone.Tools;
 using MonkePhone.Utilities;
+using Photon.Pun;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -97,6 +98,27 @@ namespace MonkePhone.Behaviours.Apps
                     RefreshApp();
 
                     break;
+
+                case "Photos Post":
+
+                    if (_photoComparison.Count == 0)
+                    {
+                        return;
+                    }
+
+                    var fileName = Path.GetFileName(_photoComparison.ElementAt(_currentPhoto).Key);
+                    var photo = RelativePhotos.FirstOrDefault(photo => photo.Name == fileName);
+
+                    if (photo == null || photo.UploadState > 0)
+                    {
+                        return;
+                    }
+
+                    photo.UploadState = 1;
+
+                    SendWebhook(photo.Summary, photo.Bytes);
+
+                    break;
             }
         }
 
@@ -136,11 +158,67 @@ namespace MonkePhone.Behaviours.Apps
 
                 Photo relativePhoto = RelativePhotos.Any() ? RelativePhotos.FirstOrDefault(photo => photo.Name == fileName) : null;
 
-                _uploadButton.SetActive(false);
+                if (relativePhoto == null || string.IsNullOrEmpty(Configuration.WebhookEndpoint.Value) || string.IsNullOrWhiteSpace(Configuration.WebhookEndpoint.Value))
+                {
+                    _uploadButton.SetActive(false);
+                    return;
+                }
+
+                _uploadButton.SetActive(true);
+                _uploadButton.transform.Find("Image").GetComponent<Image>().color = relativePhoto.UploadState switch
+                {
+                    0 => Color.black,
+                    1 => Color.grey,
+                    2 => Color.green,
+                    _ => Color.black
+                };
             }
             catch (Exception ex)
             {
                 Logging.Error($"Error when loading photos: {ex}");
+            }
+        }
+
+        private async void SendWebhook(string message, byte[] image)
+        {
+            var fileName = Path.GetFileName(_photoComparison.ElementAt(_currentPhoto).Key);
+
+            _uploadButton.transform.Find("Image").GetComponent<Image>().color = Color.grey;
+
+            var form = new WWWForm();
+
+            form.AddField("username", $"MonkeGram - {PhotonNetwork.LocalPlayer.GetName()}");
+            form.AddField("content", $"{message}:");
+            form.AddBinaryData("file", image, "image.png", "image/png");
+
+            UnityWebRequest webRequest = UnityWebRequest.Post(Configuration.WebhookEndpoint.Value, form);
+            await YieldUtils.Yield(webRequest);
+
+            Photo photo = RelativePhotos.First(photo => photo.Name == fileName);
+            bool isRelevant = Path.GetFileName(_photoComparison.ElementAt(_currentPhoto).Key) == fileName;
+
+            if (webRequest.result == UnityWebRequest.Result.Success)
+            {
+                Logging.Log("A photo has been successfully uploaded to the website");
+
+                PlaySound("RequestSuccess");
+
+                photo.UploadState = 2;
+
+                if (!isRelevant) return;
+                _uploadButton.transform.Find("Image").GetComponent<Image>().color = Color.green;
+            }
+            else
+            {
+                Logging.Error($"A photo was unable to be uploaded to the website: {webRequest.error}");
+                Logging.Warning($"Server response: {webRequest.downloadHandler.text}");
+
+                PlaySound("RequestDenied");
+
+                photo.UploadState = 0;
+
+                if (!isRelevant) return;
+                _uploadButton.transform.Find("Image").GetComponent<Image>().color = Color.red;
             }
         }
     }

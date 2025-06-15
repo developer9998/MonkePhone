@@ -47,7 +47,7 @@ namespace MonkePhone.Behaviours.Apps
             if (_configurationEntries == null)
             {
                 var configFile = Configuration.File;
-                _configurationEntries = configFile.Keys.Where(definition => definition.Key != "Wallpaper" && definition.Key != "Upload Key" && definition.Key != "Upload URL").Select(definition => configFile[definition]);
+                _configurationEntries = configFile.Keys.Where(definition => definition.Key != "Wallpaper" && definition.Key != "Webhook Url").Select(definition => configFile[definition]);
             }
 
             RefreshApp();

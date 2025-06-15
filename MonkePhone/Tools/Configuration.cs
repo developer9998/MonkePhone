@@ -9,6 +9,8 @@ namespace MonkePhone.Tools
     {
         public static ConfigFile File;
 
+        public static ConfigEntry<string> WebhookEndpoint;
+
         // Appearance //
 
         public static ConfigEntry<string> WallpaperName;
@@ -48,6 +50,14 @@ namespace MonkePhone.Tools
         public static void Construct(ConfigFile file)
         {
             File = file;
+
+            WebhookEndpoint = File.Bind
+            (
+                Constants.Name,
+                "Webhook Url",
+                "<INSERT WEBHOOK HERE>",
+                "The user-defined webhook for posting captured photos. Please be cautious with the distribution of your webhook."
+            );
 
             WallpaperName = File.Bind
             (

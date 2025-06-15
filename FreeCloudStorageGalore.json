@@ -1,0 +1,34 @@
+{
+    "version": "1.0.2",
+    "invite": "https://discord.gg/dev9998",
+    "phoneEmoji" : "<:monkephone:1377063021758779454>",
+    "cosmeticEmoji" :
+    [
+        {
+            "cosmeticId" : "LBAAK.",
+            "emoji" : "<:stick:1382942646942695484>"
+        },
+        {
+            "cosmeticId" : "LBADE.",
+            "emoji" : "<:fingerpainter:1382942649476190238>"
+        },
+        {
+            "cosmeticId" : "LBAGS.",
+            "emoji" : "<:illustrator:1382942648305979442>"
+        }
+    ],
+    "userSpecificEmoji" : [
+        {
+            "userId" : "E354E818871BD1D8",
+            "emoji" : "<:Dev:1265372162869563555>"
+        }
+    ],
+    "songs" : [
+        {
+            "title" : "SongTitle",
+            "coverUrl" : "SongPath",
+            "fileName" : "Song.mp3",
+            "fileDownloadUrl" : "SongDownloadUrl"
+        }
+    ]
+  }
