@@ -2,7 +2,7 @@
 MonkePhone is a utility mod for Gorilla Tag founded by [Striker](https://github.com/Striker-67) and [Biotest](https://github.com/biotest052) with development led by [Dev](https://github.com/developer9998). It is primarily used as a glorifed photo capture and distribution mod made simple and customizable.
 
 ## FAQ - frequently asked questions
-#### 
+work-in-progress!
 
 ## Resources
 🗄️ MonkePhone photo archive: https://drive.google.com/drive/folders/15R_B7z_QMueqlCNcDCqLoZGEu5QFAk59?usp=sharing
