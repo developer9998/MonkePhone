@@ -1,8 +1,8 @@
-﻿using System;
+﻿using MonkePhone.Behaviours;
+using MonkePhone.Utilities;
+using System;
 using System.IO;
 using System.Threading.Tasks;
-using MonkePhone.Behaviours;
-using MonkePhone.Utilities;
 using UnityEngine.Networking;
 
 namespace MonkePhone.Models
@@ -32,7 +32,7 @@ namespace MonkePhone.Models
         public string fileName;
         public string fileDownloadUrl;
 
-        public string FilePath => Path.Combine(PhoneHandler.Instance.MusicPath, fileName);
+        public string FilePath => Path.Combine(PhoneManager.Instance.MusicPath, fileName);
         public bool IsDownloaded => File.Exists(FilePath);
 
         [NonSerialized]

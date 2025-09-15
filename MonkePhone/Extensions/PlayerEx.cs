@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using ExitGames.Client.Photon;
+﻿using ExitGames.Client.Photon;
 using GorillaNetworking;
 using MonkePhone.Behaviours;
 using Photon.Pun;
 using Photon.Realtime;
+using System.Linq;
 
 namespace MonkePhone.Extensions
 {
@@ -51,12 +51,12 @@ namespace MonkePhone.Extensions
 
             if (includePhone && customProperties.ContainsKey(Constants.CustomProperty))
             {
-                summaryAppendage += PhoneHandler.Instance.Data.phoneEmoji;
+                summaryAppendage += PhoneManager.Instance.Data.phoneEmoji;
             }
 
             if (wornCosmetics != "")
             {
-                var usedCosmeticEmoji = PhoneHandler.Instance.Data.cosmeticEmoji.Where(emoji => wornCosmetics.Contains(emoji.cosmeticId));
+                var usedCosmeticEmoji = PhoneManager.Instance.Data.cosmeticEmoji.Where(emoji => wornCosmetics.Contains(emoji.cosmeticId));
                 foreach (var emoji in usedCosmeticEmoji)
                 {
                     summaryAppendage += emoji.emoji;

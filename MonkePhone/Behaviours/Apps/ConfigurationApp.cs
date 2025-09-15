@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using BepInEx.Configuration;
+﻿using BepInEx.Configuration;
 using MonkePhone.Behaviours.UI;
 using MonkePhone.Extensions;
 using MonkePhone.Tools;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,7 +47,7 @@ namespace MonkePhone.Behaviours.Apps
             if (_configurationEntries == null)
             {
                 var configFile = Configuration.File;
-                _configurationEntries = configFile.Keys.Where(definition => definition.Key != "Wallpaper" && definition.Key != "Webhook Url").Select(definition => configFile[definition]);
+                _configurationEntries = configFile.Keys.Where(definition => definition.Key != "Wallpaper" && !definition.Key.StartsWith("Upload")).Select(definition => configFile[definition]);
             }
 
             RefreshApp();

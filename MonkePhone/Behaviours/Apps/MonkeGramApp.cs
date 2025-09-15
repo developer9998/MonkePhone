@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using GorillaTagScripts.ModIO;
+﻿using GorillaTagScripts.ModIO;
 using ModIO;
 using MonkePhone.Behaviours.UI;
 using MonkePhone.Extensions;
@@ -9,6 +6,9 @@ using MonkePhone.Models;
 using MonkePhone.Patches;
 using MonkePhone.Tools;
 using Photon.Pun;
+using System;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
@@ -160,7 +160,8 @@ namespace MonkePhone.Behaviours.Apps
 
             if (Configuration.PlayerMention.Value && PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.PlayerCount > 1)
             {
-                int supportiveLayerMask = LayerMask.GetMask(
+                int supportiveLayerMask = LayerMask.GetMask
+                (
                     UnityLayer.Default.ToString(),
                     UnityLayer.GorillaTagCollider.ToString(),
                     UnityLayer.GorillaObject.ToString(),
@@ -189,9 +190,9 @@ namespace MonkePhone.Behaviours.Apps
                 _photoByteArray = _finalTexture.EncodeToPNG();
 
                 string name = $"Photo_{DateTime.Now:yy_MM-dd_HH_mm_ss_ff}.png";
-                var path = Path.Combine(PhoneHandler.Instance.PhotosPath, name);
+                var path = Path.Combine(PhoneManager.Instance.PhotosPath, name);
 
-                File.WriteAllBytes(path, _photoByteArray);
+                await File.WriteAllBytesAsync(path, _photoByteArray);
 
                 GetApp<GalleryApp>().RelativePhotos.Add(new Photo()
                 {
@@ -206,7 +207,7 @@ namespace MonkePhone.Behaviours.Apps
 
         public void UpdateProperties()
         {
-            PhoneHandler.Instance.Phone.UpdateProperties();
+            PhoneManager.Instance.Phone.UpdateProperties();
         }
     }
 }

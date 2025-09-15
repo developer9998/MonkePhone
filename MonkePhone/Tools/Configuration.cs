@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
-using BepInEx.Configuration;
+﻿using BepInEx.Configuration;
 using MonkePhone.Behaviours;
 using MonkePhone.Behaviours.Apps;
+using System.ComponentModel;
 
 namespace MonkePhone.Tools
 {
@@ -9,7 +9,11 @@ namespace MonkePhone.Tools
     {
         public static ConfigFile File;
 
-        public static ConfigEntry<string> WebhookEndpoint;
+        public static ConfigEntry<EUploadMethod> UploadMethod;
+
+        public static ConfigEntry<string> UploadKey;
+
+        public static ConfigEntry<string> UploadUrl;
 
         // Appearance //
 
@@ -51,12 +55,25 @@ namespace MonkePhone.Tools
         {
             File = file;
 
-            WebhookEndpoint = File.Bind
+            UploadMethod = File.Bind
             (
-                Constants.Name,
-                "Webhook Url",
-                "<INSERT WEBHOOK HERE>",
-                "The user-defined webhook for posting captured photos. Please be cautious with the distribution of your webhook."
+                "External", "Upload Method",
+                EUploadMethod.Webhook,
+                "The method used for uploading photos."
+            );
+
+            UploadUrl = File.Bind
+            (
+                "External", "Upload Destination",
+                string.Empty,
+                "The link your photo upload is sent through."
+            );
+
+            UploadKey = File.Bind
+            (
+                "External", "Upload Authentication Key",
+                string.Empty,
+                "The authorization header used for a photo upload using a custom server. Please refrain from distributing your key to anyone, MonkePhone is not responsible for any breaches."
             );
 
             WallpaperName = File.Bind
@@ -78,7 +95,7 @@ namespace MonkePhone.Tools
             CameraResolution.SettingChanged += (object sender, System.EventArgs e) =>
             {
                 var resolution = CameraResolution.Value;
-                PhoneHandler.Instance?.GetApp<MonkeGramApp>()?.AdjustCameraQuality((int)resolution);
+                PhoneManager.Instance?.GetApp<MonkeGramApp>()?.AdjustCameraQuality((int)resolution);
             };
 
             VolumeMultiplier = File.Bind
@@ -99,7 +116,7 @@ namespace MonkePhone.Tools
 
             MusicMultiplier.SettingChanged += (object sender, System.EventArgs e) =>
             {
-                PhoneHandler.Instance?.GetApp<MusicApp>()?.SetVolumeMultiplier(MusicMultiplier.Value);
+                PhoneManager.Instance?.GetApp<MusicApp>()?.SetVolumeMultiplier(MusicMultiplier.Value);
             };
 
             UseSpatialBlend = File.Bind
@@ -112,7 +129,7 @@ namespace MonkePhone.Tools
 
             UseSpatialBlend.SettingChanged += (object sender, System.EventArgs e) =>
             {
-                PhoneHandler.Instance?.GetApp<MusicApp>()?.SetSpatialBlend(UseSpatialBlend.Value);
+                PhoneManager.Instance?.GetApp<MusicApp>()?.SetSpatialBlend(UseSpatialBlend.Value);
             };
 
             AutoPowered = File.Bind
@@ -212,6 +229,12 @@ namespace MonkePhone.Tools
             Ultra = 2048,
             [Description("4k 2^12")]
             Profesional = 4096
+        }
+
+        public enum EUploadMethod
+        {
+            Webhook,
+            CustomServer
         }
     }
 }

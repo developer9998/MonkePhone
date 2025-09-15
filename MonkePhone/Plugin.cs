@@ -1,10 +1,9 @@
-﻿using System;
-using System.IO;
-using BepInEx;
+﻿using BepInEx;
 using HarmonyLib;
 using MonkePhone.Behaviours;
 using MonkePhone.Networking;
 using MonkePhone.Tools;
+using System;
 using UnityEngine;
 
 namespace MonkePhone
@@ -16,11 +15,7 @@ namespace MonkePhone
         {
             Logging.Logger = Logger;
             Configuration.Construct(Config);
-        }
 
-        public void Start()
-        {
-            Logging.Info($"MonkePhone folder can be located at '{Path.Combine(Paths.BepInExRootPath, "MonkePhone")}'");
             GorillaTagger.OnPlayerSpawned(Initialize);
 
             Harmony.CreateAndPatchAll(typeof(Plugin).Assembly, Constants.GUID);
@@ -30,7 +25,7 @@ namespace MonkePhone
         {
             try
             {
-                new GameObject("MonkePhone", typeof(NetworkHandler), typeof(PhoneHandler));
+                new GameObject("MonkePhone", typeof(NetworkHandler), typeof(PhoneManager));
             }
             catch (Exception ex)
             {

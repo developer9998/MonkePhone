@@ -13,8 +13,8 @@ namespace MonkePhone.Behaviours
 {
     public class Phone : HoldableObject, IPhoneAnimation
     {
-        public static bool Held => PhoneHandler.Instance.Phone.InHand;
-        public static bool LeftHand => PhoneHandler.Instance.Phone.InLeftHand;
+        public static bool Held => PhoneManager.Instance.Phone.InHand;
+        public static bool LeftHand => PhoneManager.Instance.Phone.InLeftHand;
 
         public ObjectGrabbyState State { get; set; }
         public bool UseLeftHand { get; set; }
@@ -32,7 +32,7 @@ namespace MonkePhone.Behaviours
 
         public bool levitate_device = false;
 
-        public static bool Leviating => PhoneHandler.Instance.Phone.levitate_device;
+        public static bool Leviating => PhoneManager.Instance.Phone.levitate_device;
 
         public void Awake()
         {
@@ -206,14 +206,14 @@ namespace MonkePhone.Behaviours
         {
             levitate_device = false;
 
-            if (State == ObjectGrabbyState.Awake && !PhoneHandler.Instance.IsOutdated)
+            if (State == ObjectGrabbyState.Awake && !PhoneManager.Instance.IsOutdated)
             {
-                PhoneHandler.Instance.PlaySound("InitialGrab", 0.7f);
+                PhoneManager.Instance.PlaySound("InitialGrab", 0.7f);
             }
 
-            if (State == ObjectGrabbyState.Awake && !PhoneHandler.Instance.IsPowered)
+            if (State == ObjectGrabbyState.Awake && !PhoneManager.Instance.IsPowered)
             {
-                PhoneHandler.Instance.SetPower(true);
+                PhoneManager.Instance.SetPower(true);
             }
 
             InterpolationTime = 0f;
@@ -259,7 +259,7 @@ namespace MonkePhone.Behaviours
         {
             NetworkHandler networkHandler = NetworkHandler.Instance;
 
-            MonkeGramApp monkeGram = PhoneHandler.Instance.GetApp<MonkeGramApp>();
+            MonkeGramApp monkeGram = PhoneManager.Instance.GetApp<MonkeGramApp>();
 
             networkHandler.SetProperty("Grab", (byte)(!InHand ? (levitate_device ? 3 : 0) : (InLeftHand ? 1 : 2)));
             networkHandler.SetProperty("Zoom", monkeGram.CameraZoom);

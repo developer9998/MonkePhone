@@ -44,11 +44,16 @@ namespace MonkePhone.Behaviours.UI
             switch (name)
             {
                 case "HomeButton":
-                    InvokeMethod(nameof(PhoneHandler.SetHome));
+                    InvokeMethod(nameof(PhoneManager.SetHome));
                     break;
 
                 case "PowerButton":
-                    InvokeMethod(nameof(PhoneHandler.TogglePower));
+                    InvokeMethod(nameof(PhoneManager.TogglePower));
+                    break;
+
+                case "HidePromo":
+                    PhoneManager.Instance.watchPromoObject.SetActive(false);
+                    PlayerPrefs.SetInt("IgnorePromo", 1);
                     break;
             }
         }

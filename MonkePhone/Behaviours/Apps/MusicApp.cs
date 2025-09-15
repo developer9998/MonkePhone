@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using MonkePhone.Behaviours.UI;
+﻿using MonkePhone.Behaviours.UI;
 using MonkePhone.Extensions;
 using MonkePhone.Models;
 using MonkePhone.Tools;
 using MonkePhone.Utilities;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -36,7 +36,7 @@ namespace MonkePhone.Behaviours.Apps
 
         public override void Initialize()
         {
-            MusicSource = PhoneHandler.Instance.Phone.transform.Find("Music Source").GetComponent<AudioSource>();
+            MusicSource = PhoneManager.Instance.Phone.transform.Find("Music Source").GetComponent<AudioSource>();
 
             _songTitle = transform.Find("CurrentlyPlayingContents/AudioTitle").GetComponent<Text>();
             _songTimePosition = transform.Find("CurrentlyPlayingContents/Timeline/Slider/Text (Legacy)").GetComponent<Text>();
@@ -72,7 +72,7 @@ namespace MonkePhone.Behaviours.Apps
         {
             var current = _musicList;
 
-            _musicList = Directory.GetFiles(PhoneHandler.Instance.MusicPath).Where(file => file.ToLower().EndsWith(".mp3") || file.ToLower().EndsWith(".ogg") || file.ToLower().EndsWith(".wav")).ToList();
+            _musicList = Directory.GetFiles(PhoneManager.Instance.MusicPath).Where(file => file.ToLower().EndsWith(".mp3") || file.ToLower().EndsWith(".ogg") || file.ToLower().EndsWith(".wav")).ToList();
 
             var missingItems = current.Where(str => !_musicList.Contains(str) && _musicComparison.ContainsKey(str));
 
@@ -102,8 +102,8 @@ namespace MonkePhone.Behaviours.Apps
 
         private void RefreshDownloadables()
         {
-            _currentPage = MathEx.Wrap(_currentPage, 0, Mathf.CeilToInt(PhoneHandler.Instance.Data.songs.Length / 3f));
-            Song[] songs = { PhoneHandler.Instance.Data.songs.ElementAtOrDefault((_currentPage * 3) + 0), PhoneHandler.Instance.Data.songs.ElementAtOrDefault((_currentPage * 3) + 1), PhoneHandler.Instance.Data.songs.ElementAtOrDefault((_currentPage * 3) + 2) };
+            _currentPage = MathEx.Wrap(_currentPage, 0, Mathf.CeilToInt(PhoneManager.Instance.Data.songs.Length / 3f));
+            Song[] songs = { PhoneManager.Instance.Data.songs.ElementAtOrDefault((_currentPage * 3) + 0), PhoneManager.Instance.Data.songs.ElementAtOrDefault((_currentPage * 3) + 1), PhoneManager.Instance.Data.songs.ElementAtOrDefault((_currentPage * 3) + 2) };
             Transform table = transform.Find("MusicDownloadContainer/Table");
             _streambleMusicComponents.Clear();
 

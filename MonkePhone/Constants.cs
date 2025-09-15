@@ -10,7 +10,7 @@ namespace MonkePhone
         /// <summary>
         /// The GUID (globally unique identifier) used when registering the plugin
         /// </summary>
-        public const string GUID = "monkephonedev.monkephone";
+        public const string GUID = "dev.monkephone";
 
         /// <summary>
         /// The name of the plugin
@@ -20,7 +20,7 @@ namespace MonkePhone
         /// <summary>
         /// The version of the plugin (formatted into <see cref="System.Version"/>)
         /// </summary>
-        public const string Version = "1.0.2";
+        public const string Version = "1.0.3";
 
         // Assets
 

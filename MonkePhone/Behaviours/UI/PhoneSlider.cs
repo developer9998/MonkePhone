@@ -108,7 +108,7 @@ namespace MonkePhone.Behaviours.UI
             _handIndicator = null;
             Adjusted(false);
 
-            PhoneHandler.Instance.PlaySound("BasicTap");
+            PhoneManager.Instance.PlaySound("BasicTap");
         }
 
         public void Adjusted(bool isSelected)

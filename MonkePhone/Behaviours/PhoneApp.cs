@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using MonkePhone.Behaviours.UI;
+﻿using MonkePhone.Behaviours.UI;
 using MonkePhone.Interfaces;
+using System.Linq;
 
 namespace MonkePhone.Behaviours
 {
@@ -58,9 +58,9 @@ namespace MonkePhone.Behaviours
 
         }
 
-        public bool Opened => PhoneHandler.Instance.AppOpened(this);
+        public bool Opened => PhoneManager.Instance.AppOpened(this);
 
-        public T GetApp<T>() where T : PhoneApp => PhoneHandler.Instance.GetApp<T>();
+        public T GetApp<T>() where T : PhoneApp => PhoneManager.Instance.GetApp<T>();
 
         public PhoneUIObject GetObject(string objectName, bool includeInactive = false) => gameObject.GetComponentsInChildren<PhoneUIObject>(includeInactive).FirstOrDefault(phoneUiObject => phoneUiObject.name == objectName);
     }

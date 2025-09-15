@@ -1,6 +1,6 @@
-﻿using System.Collections;
+﻿using MonkePhone.Behaviours;
+using System.Collections;
 using System.Threading.Tasks;
-using MonkePhone.Behaviours;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -11,14 +11,14 @@ namespace MonkePhone.Utilities
         public static async Task Yield(UnityWebRequest webRequest)
         {
             var completionSource = new TaskCompletionSource<UnityWebRequest>();
-            PhoneHandler.Instance.StartCoroutine(AwaitWebRequestCoroutine(webRequest, completionSource));
+            PhoneManager.Instance.StartCoroutine(AwaitWebRequestCoroutine(webRequest, completionSource));
             await completionSource.Task;
         }
 
         public static async Task Yield(YieldInstruction instruction)
         {
             var completionSource = new TaskCompletionSource<YieldInstruction>();
-            PhoneHandler.Instance.StartCoroutine(AwaitInstructionCorouutine(instruction, completionSource));
+            PhoneManager.Instance.StartCoroutine(AwaitInstructionCorouutine(instruction, completionSource));
             await completionSource.Task;
         }
 

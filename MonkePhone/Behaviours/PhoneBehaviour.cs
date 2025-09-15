@@ -26,8 +26,8 @@ namespace MonkePhone.Behaviours
 
         public void InvokeMethod(string methodName, params object[] parameters)
         {
-            MethodInfo method = AccessTools.Method(typeof(PhoneHandler), methodName);
-            method?.Invoke(PhoneHandler.Instance, parameters);
+            MethodInfo method = AccessTools.Method(typeof(PhoneManager), methodName);
+            method?.Invoke(PhoneManager.Instance, parameters);
         }
 #endif
     }

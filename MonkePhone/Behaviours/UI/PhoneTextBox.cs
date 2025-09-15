@@ -32,12 +32,12 @@ namespace MonkePhone.Behaviours.UI
 
             _lastActivation = Time.realtimeSinceStartup;
 
-            if (!PhoneHandler.Instance.Keyboard.Active)
+            if (!PhoneManager.Instance.Keyboard.Active)
             {
                 PlaySound("MenuTap", 0.36f);
                 Vibration(handIndicator.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
 
-                PhoneHandler.Instance.Keyboard.Active = true;
+                PhoneManager.Instance.Keyboard.Active = true;
             }
         }
 #endif
