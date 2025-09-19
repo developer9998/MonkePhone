@@ -1,5 +1,5 @@
-﻿using GorillaTagScripts.ModIO;
-using ModIO;
+﻿using GorillaTagScripts.VirtualStumpCustomMaps;
+using Modio.Mods;
 using MonkePhone.Behaviours.UI;
 using MonkePhone.Extensions;
 using MonkePhone.Models;
@@ -137,22 +137,21 @@ namespace MonkePhone.Behaviours.Apps
 
             if (ModIOManager.IsLoggedIn())
             {
-                currentMap = GTZone.customMaps.ToTitleCase().ToUpper();
+                // currentMap = GTZone.customMaps.ToTitleCase().ToUpper();
 
                 ModId currentRoomMap = CustomMapManager.GetRoomMapId();
                 if (currentRoomMap != ModId.Null)
                 {
-                    ModIOManager.GetModProfile(currentRoomMap, (ModIORequestResultAnd<ModProfile> result) =>
+                    var (error, mod) = await ModIOManager.GetMod(currentRoomMap);
+
+                    if (error)
                     {
-                        if (result.result.success) // second login check, just to be safe!
-                        {
-                            currentMap = $"{result.data.name} ({result.data.creator.username})";
-                        }
-                        else
-                        {
-                            Logging.Warning(result.result.message);
-                        }
-                    });
+                        Logging.Error($"Error {error.Code.GetIndex()}/{error.Code.GetName()} : {error.CustomMessage}");
+                    }
+                    else
+                    {
+                        currentMap = $"{mod.Name} : {mod.Creator.Username}";
+                    }
                 }
             }
 
