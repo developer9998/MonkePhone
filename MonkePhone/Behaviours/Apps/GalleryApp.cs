@@ -171,7 +171,7 @@ namespace MonkePhone.Behaviours.Apps
 
                 Photo relativePhoto = RelativePhotos.Any() ? RelativePhotos.FirstOrDefault(photo => photo.Name == fileName) : null;
 
-                bool validKey = (!string.IsNullOrEmpty(Configuration.UploadKey.Value) && !string.IsNullOrWhiteSpace(Configuration.UploadKey.Value));
+                bool validKey = !string.IsNullOrEmpty(Configuration.UploadUrl.Value) && (Configuration.UploadMethod.Value == Configuration.EUploadMethod.Webhook || !string.IsNullOrEmpty(Configuration.UploadKey.Value));
 
                 if (relativePhoto == null || !validKey)
                 {
