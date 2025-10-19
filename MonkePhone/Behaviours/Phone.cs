@@ -88,8 +88,8 @@ namespace MonkePhone.Behaviours
                 _isSwapped = false;
             }
 
-            bool isHoldingLeftPiece = BuilderPieceInteractor.instance.heldPiece.ElementAtOrDefault(0) is not null || GamePlayerLocal.instance.gamePlayer.GetGameEntityId(0).IsValid();
-            bool isHoldingRightPiece = BuilderPieceInteractor.instance.heldPiece.ElementAtOrDefault(1) is not null || GamePlayerLocal.instance.gamePlayer.GetGameEntityId(1).IsValid();
+            bool isHoldingLeftPiece = BuilderPieceInteractor.instance.heldPiece.ElementAtOrDefault(0) is not null || GamePlayerLocal.instance.gamePlayer.GetGameEntityId(true).IsValid();
+            bool isHoldingRightPiece = BuilderPieceInteractor.instance.heldPiece.ElementAtOrDefault(1) is not null || GamePlayerLocal.instance.gamePlayer.GetGameEntityId(false).IsValid();
 
             bool isGrabbingLeft = leftGrip && Vector3.Distance(currentLeftControllerPosition, currentHandheldPosition) < grabDistance && !InHand && EquipmentInteractor.instance.leftHandHeldEquipment == null && !isHoldingLeftPiece && !_isSwapped;
             bool isSwappingLeft = Configuration.HandSwapping.Value && InHand && leftGrip && rightGrip && !_isSwapped && (Vector3.Distance(currentLeftControllerPosition, currentHandheldPosition) < grabDistance) && !_wasSwappedLeft && EquipmentInteractor.instance.leftHandHeldEquipment == null && !isHoldingLeftPiece;
