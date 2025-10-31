@@ -1,7 +1,6 @@
-﻿namespace MonkePhone.Behaviours.Apps
+﻿namespace MonkePhone.Behaviours.Apps;
+
+public class MessagingApp : PhoneApp
 {
-    public class MessagingApp : PhoneApp
-    {
-        public override string AppId => "Messaging";
-    }
+    public override string AppId => "Messaging";
 }

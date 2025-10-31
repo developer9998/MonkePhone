@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
 
-namespace MonkePhone.Models
+namespace MonkePhone.Models;
+
+public struct ObjectPosition
 {
-    public struct ObjectPosition
-    {
-        public Vector3 Position;
-        public Quaternion Rotation;
-    }
+    public Vector3    Position;
+    public Quaternion Rotation;
 }

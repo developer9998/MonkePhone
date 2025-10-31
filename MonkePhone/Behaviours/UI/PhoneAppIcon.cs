@@ -8,7 +8,6 @@ namespace MonkePhone.Behaviours.UI
         public string appId;
 
 #if PLUGIN
-
         private const float _debounce = 0.13f;
 
         public void Start()
@@ -19,14 +18,16 @@ namespace MonkePhone.Behaviours.UI
 
         public void OnTriggerEnter(Collider collider)
         {
-            if (!collider.TryGetComponent(out GorillaTriggerColliderHandIndicator handIndicator) || _lastActivation + _debounce > Time.realtimeSinceStartup || (!Phone.Held && !Phone.Leviating) || (!Phone.Leviating && handIndicator.isLeftHand == Phone.LeftHand))
-            {
+            if (!collider.TryGetComponent(out GorillaTriggerColliderHandIndicator handIndicator) ||
+                _lastActivation + _debounce > Time.realtimeSinceStartup || !Phone.Held && !Phone.Leviating ||
+                !Phone.Leviating && handIndicator.isLeftHand == Phone.LeftHand)
                 return;
-            }
 
             _lastActivation = Time.realtimeSinceStartup;
 
-            Vibration(handIndicator.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
+            Vibration(handIndicator.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f,
+                    GorillaTagger.Instance.tapHapticDuration);
+
             PlaySound("BasicTap", 0.36f);
 
             InvokeMethod("OpenApp", appId);

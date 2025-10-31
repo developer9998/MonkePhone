@@ -1,11 +1,10 @@
-﻿namespace MonkePhone.Models
+﻿namespace MonkePhone.Models;
+
+public enum PlayerSpecialityType
 {
-    public enum PlayerSpecialityType
-    {
-        None,
-        Stick,
-        FingerPainter,
-        Illustrator,
-        PlushBacker
-    }
+    None,
+    Stick,
+    FingerPainter,
+    Illustrator,
+    PlushBacker,
 }

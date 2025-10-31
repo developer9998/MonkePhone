@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-
 #if PLUGIN
 using HarmonyLib;
 using System.Reflection;
@@ -11,13 +10,10 @@ namespace MonkePhone.Behaviours
     public class PhoneBehaviour : MonoBehaviour
     {
 #if PLUGIN
-
         public void Vibration(bool isLeftHand, float amplitude, float duration)
         {
             if (!Configuration.AppHaptics.Value)
-            {
                 return;
-            }
 
             GorillaTagger.Instance.StartVibration(isLeftHand, amplitude, duration);
         }

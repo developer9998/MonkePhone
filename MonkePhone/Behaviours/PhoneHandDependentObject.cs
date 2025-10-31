@@ -10,13 +10,13 @@ namespace MonkePhone.Behaviours
         public void Awake()
         {
             _position = transform.localPosition;
-            _scale = transform.localScale;
+            _scale    = transform.localScale;
         }
 
         public void SetFlip(bool useFlipped)
         {
             transform.localPosition = new Vector3(useFlipped ? -_position.x : _position.x, _position.y, _position.z);
-            transform.localScale = new Vector3(_scale.x, _scale.y, useFlipped ? -_scale.z : _scale.z);
+            transform.localScale    = new Vector3(_scale.x, _scale.y, useFlipped ? -_scale.z : _scale.z);
         }
 
 #if PLUGIN == false

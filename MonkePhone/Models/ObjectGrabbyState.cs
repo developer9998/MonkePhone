@@ -1,10 +1,9 @@
-﻿namespace MonkePhone.Models
+﻿namespace MonkePhone.Models;
+
+public enum ObjectGrabbyState
 {
-    public enum ObjectGrabbyState
-    {
-        Awake,
-        InHand,
-        Mounted,
-        Ignore
-    }
+    Awake,
+    InHand,
+    Mounted,
+    Ignore,
 }

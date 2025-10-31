@@ -1,240 +1,240 @@
-﻿using BepInEx.Configuration;
+﻿using System.ComponentModel;
+using BepInEx.Configuration;
 using MonkePhone.Behaviours;
 using MonkePhone.Behaviours.Apps;
-using System.ComponentModel;
 
-namespace MonkePhone.Tools
+namespace MonkePhone.Tools;
+
+public class Configuration
 {
-    public class Configuration
+    public enum EInitialPhoneLocation
     {
-        public static ConfigFile File;
+        [Description("The phone will be placed on the table in stump")]
+        Table,
 
-        public static ConfigEntry<EUploadMethod> UploadMethod;
+        [Description("The phone will levitate in the centre of stump")]
+        Levitate,
 
-        public static ConfigEntry<string> UploadKey;
+        [Description("The phone will be mounted to the waist of the player")]
+        Waist,
+    }
 
-        public static ConfigEntry<string> UploadUrl;
+    public enum EPhoneResolution
+    {
+        [Description("128p 2^7")] Poor        = 128,
+        [Description("256p 2^8")] Low         = 256,
+        [Description("512p 2^9")] Medium      = 512,
+        [Description("1k 2^10")]  High        = 1024,
+        [Description("2k 2^11")]  Ultra       = 2048,
+        [Description("4k 2^12")]  Profesional = 4096,
+    }
 
-        // Appearance //
+    public enum EUploadMethod
+    {
+        Webhook,
+        CustomServer,
+    }
 
-        public static ConfigEntry<string> WallpaperName;
+    public static ConfigFile File;
 
-        public static ConfigEntry<EPhoneResolution> CameraResolution;
+    public static ConfigEntry<EUploadMethod> UploadMethod;
 
-        // Auditory //
+    public static ConfigEntry<string> UploadKey;
 
-        public static ConfigEntry<float> VolumeMultiplier;
+    public static ConfigEntry<string> UploadUrl;
 
-        public static ConfigEntry<float> MusicMultiplier;
+    // Appearance //
 
-        public static ConfigEntry<bool> UseSpatialBlend;
+    public static ConfigEntry<string> WallpaperName;
 
-        // Behaviour //
+    public static ConfigEntry<EPhoneResolution> CameraResolution;
 
-        public static ConfigEntry<bool> AutoPowered;
+    // Auditory //
 
-        public static ConfigEntry<EInitialPhoneLocation> InitialPosition;
+    public static ConfigEntry<float> VolumeMultiplier;
 
-        public static ConfigEntry<bool> HandSwapping;
+    public static ConfigEntry<float> MusicMultiplier;
 
-        public static ConfigEntry<bool> PlayerMention;
+    public static ConfigEntry<bool> UseSpatialBlend;
 
-        public static ConfigEntry<bool> RevealMap;
+    // Behaviour //
 
-        // Tactile //
+    public static ConfigEntry<bool> AutoPowered;
 
-        public static ConfigEntry<bool> ObjectHaptics;
+    public static ConfigEntry<EInitialPhoneLocation> InitialPosition;
 
-        public static ConfigEntry<bool> AppHaptics;
+    public static ConfigEntry<bool> HandSwapping;
 
-        public static ConfigEntry<bool> SoundHaptics;
+    public static ConfigEntry<bool> PlayerMention;
 
-        public static ConfigEntry<bool> MusicHaptics;
+    public static ConfigEntry<bool> RevealMap;
 
-        public static void Construct(ConfigFile file)
-        {
-            File = file;
+    // Tactile //
 
-            UploadMethod = File.Bind
-            (
+    public static ConfigEntry<bool> ObjectHaptics;
+
+    public static ConfigEntry<bool> AppHaptics;
+
+    public static ConfigEntry<bool> SoundHaptics;
+
+    public static ConfigEntry<bool> MusicHaptics;
+
+    public static void Construct(ConfigFile file)
+    {
+        File = file;
+
+        UploadMethod = File.Bind
+        (
                 "External", "Upload Method",
                 EUploadMethod.Webhook,
                 "The method used for uploading photos."
-            );
+        );
 
-            UploadUrl = File.Bind
-            (
+        UploadUrl = File.Bind
+        (
                 "External", "Upload Destination",
                 string.Empty,
                 "The link your photo upload is sent through."
-            );
+        );
 
-            UploadKey = File.Bind
-            (
+        UploadKey = File.Bind
+        (
                 "External", "Upload Authentication Key",
                 string.Empty,
                 "The authorization header used for a photo upload using a custom server. Please refrain from distributing your key to anyone, MonkePhone is not responsible for any breaches."
-            );
+        );
 
-            WallpaperName = File.Bind
-            (
+        WallpaperName = File.Bind
+        (
                 "Appearance",
                 "Wallpaper",
                 "",
                 new ConfigDescription("The photo currently being used as the wallpaper")
-            );
+        );
 
-            CameraResolution = File.Bind
-            (
+        CameraResolution = File.Bind
+        (
                 "Appearance",
                 "Camera Resolution",
                 EPhoneResolution.High,
                 new ConfigDescription("The image resolution used by the phone cameras")
-            );
+        );
 
-            CameraResolution.SettingChanged += (object sender, System.EventArgs e) =>
-            {
-                var resolution = CameraResolution.Value;
-                PhoneManager.Instance?.GetApp<MonkeGramApp>()?.AdjustCameraQuality((int)resolution);
-            };
+        CameraResolution.SettingChanged += (sender, e) =>
+                                           {
+                                               EPhoneResolution resolution = CameraResolution.Value;
+                                               PhoneManager.Instance?.GetApp<MonkeGramApp>()
+                                                          ?.AdjustCameraQuality((int)resolution);
+                                           };
 
-            VolumeMultiplier = File.Bind
-            (
+        VolumeMultiplier = File.Bind
+        (
                 "Auditory",
                 "Sound Volume",
                 1f,
-                new ConfigDescription("The volume for sound produced by the phone", new AcceptableValueRange<float>(0f, 1f))
-            );
+                new ConfigDescription("The volume for sound produced by the phone",
+                        new AcceptableValueRange<float>(0f, 1f))
+        );
 
-            MusicMultiplier = File.Bind
-            (
+        MusicMultiplier = File.Bind
+        (
                 "Auditory",
                 "Music Volume",
                 1f,
-                new ConfigDescription("The volume for music produced by the phone", new AcceptableValueRange<float>(0f, 1f))
-            );
+                new ConfigDescription("The volume for music produced by the phone",
+                        new AcceptableValueRange<float>(0f, 1f))
+        );
 
-            MusicMultiplier.SettingChanged += (object sender, System.EventArgs e) =>
-            {
-                PhoneManager.Instance?.GetApp<MusicApp>()?.SetVolumeMultiplier(MusicMultiplier.Value);
-            };
+        MusicMultiplier.SettingChanged += (sender, e) =>
+                                          {
+                                              PhoneManager.Instance?.GetApp<MusicApp>()
+                                                         ?.SetVolumeMultiplier(MusicMultiplier.Value);
+                                          };
 
-            UseSpatialBlend = File.Bind
-            (
+        UseSpatialBlend = File.Bind
+        (
                 "Auditory",
                 "Use Spatial Blend",
                 true,
                 new ConfigDescription("If music produced by the phone will be affected by spatialisation calculations")
-            );
+        );
 
-            UseSpatialBlend.SettingChanged += (object sender, System.EventArgs e) =>
-            {
-                PhoneManager.Instance?.GetApp<MusicApp>()?.SetSpatialBlend(UseSpatialBlend.Value);
-            };
+        UseSpatialBlend.SettingChanged += (sender, e) =>
+                                          {
+                                              PhoneManager.Instance?.GetApp<MusicApp>()
+                                                         ?.SetSpatialBlend(UseSpatialBlend.Value);
+                                          };
 
-            AutoPowered = File.Bind
-            (
+        AutoPowered = File.Bind
+        (
                 "Behaviour",
                 "Auto Powered",
                 true,
                 new ConfigDescription("If the phone is powered when opening the game")
-            );
+        );
 
-            InitialPosition = File.Bind
-            (
+        InitialPosition = File.Bind
+        (
                 "Behaviour",
                 "Initial Location",
                 EInitialPhoneLocation.Table,
                 new ConfigDescription("Where the phone is located when opening the game")
-            );
+        );
 
-            HandSwapping = File.Bind
-            (
+        HandSwapping = File.Bind
+        (
                 "Behaviour",
                 "Phone Swapping",
                 true,
                 new ConfigDescription("If the phone can be swapped from hands when being held")
-            );
+        );
 
-            PlayerMention = File.Bind
-            (
+        PlayerMention = File.Bind
+        (
                 "Behaviour",
                 "Player Mentioning",
                 true,
                 new ConfigDescription("If any players visible in a photo are mentioned when uploaded")
-            );
+        );
 
-            RevealMap = File.Bind
-            (
+        RevealMap = File.Bind
+        (
                 "Behaviour",
                 "Reveal Map",
                 true,
                 new ConfigDescription("whether the current map should be disclosed in posts")
-            );
+        );
 
-            ObjectHaptics = File.Bind
-            (
+        ObjectHaptics = File.Bind
+        (
                 "Tactile",
                 "Object Vibrations",
                 true,
                 new ConfigDescription("If the phone object can produce vibrations")
-            );
+        );
 
-            AppHaptics = File.Bind
-            (
+        AppHaptics = File.Bind
+        (
                 "Tactile",
                 "App Vibrations",
                 true,
                 new ConfigDescription("If any phone app can produce vibrations")
-            );
+        );
 
-            SoundHaptics = File.Bind
-            (
+        SoundHaptics = File.Bind
+        (
                 "Tactile",
                 "Sound Vibrations",
                 false,
                 new ConfigDescription("If sound produced by the phone can replicate vibrations")
-            );
+        );
 
-            MusicHaptics = File.Bind
-            (
+        MusicHaptics = File.Bind
+        (
                 "Tactile",
                 "Music Vibrations",
                 false,
                 new ConfigDescription("If music produced by the phone can replicate vibrations")
-            );
-        }
-
-        public enum EInitialPhoneLocation
-        {
-            [Description("The phone will be placed on the table in stump")]
-            Table,
-            [Description("The phone will levitate in the centre of stump")]
-            Levitate,
-            [Description("The phone will be mounted to the waist of the player")]
-            Waist
-        }
-
-        public enum EPhoneResolution
-        {
-            [Description("128p 2^7")]
-            Poor = 128,
-            [Description("256p 2^8")]
-            Low = 256,
-            [Description("512p 2^9")]
-            Medium = 512,
-            [Description("1k 2^10")]
-            High = 1024,
-            [Description("2k 2^11")]
-            Ultra = 2048,
-            [Description("4k 2^12")]
-            Profesional = 4096
-        }
-
-        public enum EUploadMethod
-        {
-            Webhook,
-            CustomServer
-        }
+        );
     }
 }

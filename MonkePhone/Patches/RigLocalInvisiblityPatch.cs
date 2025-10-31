@@ -1,16 +1,15 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
+using HarmonyLib;
 
-namespace MonkePhone.Patches
+namespace MonkePhone.Patches;
+
+[HarmonyPatch(typeof(VRRig), nameof(VRRig.SetInvisibleToLocalPlayer))]
+public static class RigLocalInvisiblityPatch
 {
-    [HarmonyPatch(typeof(VRRig), nameof(VRRig.SetInvisibleToLocalPlayer))]
-    public static class RigLocalInvisiblityPatch
-    {
-        public static event Action<VRRig, bool> OnSetInvisibleToLocalPlayer;
+    public static event Action<VRRig, bool> OnSetInvisibleToLocalPlayer;
 
-        public static void Postfix(VRRig __instance, bool invisible)
-        {
-            OnSetInvisibleToLocalPlayer?.Invoke(__instance, invisible);
-        }
+    public static void Postfix(VRRig __instance, bool invisible)
+    {
+        OnSetInvisibleToLocalPlayer?.Invoke(__instance, invisible);
     }
 }

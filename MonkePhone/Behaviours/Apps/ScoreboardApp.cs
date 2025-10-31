@@ -1,7 +1,6 @@
-﻿namespace MonkePhone.Behaviours.Apps
+﻿namespace MonkePhone.Behaviours.Apps;
+
+public class ScoreboardApp : PhoneApp
 {
-    public class ScoreboardApp : PhoneApp
-    {
-        public override string AppId => "Scoreboard";
-    }
+    public override string AppId => "Scoreboard";
 }

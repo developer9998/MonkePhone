@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-
 #if PLUGIN
 using MonkePhone.Interfaces;
 #endif
@@ -8,8 +7,7 @@ namespace MonkePhone.Behaviours.UI
 {
     public class PhoneButton : PhoneUIObject
     {
-        [Range(0.05f, 1f)]
-        public float Debounce = 0.25f;
+        [Range(0.05f, 1f)] public float Debounce = 0.25f;
 
 #if PLUGIN
         public void Start()
@@ -20,14 +18,16 @@ namespace MonkePhone.Behaviours.UI
 
         public void OnTriggerEnter(Collider collider)
         {
-            if (!collider.TryGetComponent(out GorillaTriggerColliderHandIndicator handIndicator) || _lastActivation + Debounce > Time.realtimeSinceStartup || (!Phone.Held && !Phone.Leviating) || (!Phone.Leviating && handIndicator.isLeftHand == Phone.LeftHand))
-            {
+            if (!collider.TryGetComponent(out GorillaTriggerColliderHandIndicator handIndicator) ||
+                _lastActivation + Debounce > Time.realtimeSinceStartup || !Phone.Held && !Phone.Leviating ||
+                !Phone.Leviating && handIndicator.isLeftHand == Phone.LeftHand)
                 return;
-            }
 
             _lastActivation = Time.realtimeSinceStartup;
 
-            Vibration(handIndicator.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f, GorillaTagger.Instance.tapHapticDuration);
+            Vibration(handIndicator.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 2f,
+                    GorillaTagger.Instance.tapHapticDuration);
+
             PlaySound(name == "HomeButton" ? "MenuTap" : "BasicTap", 0.36f);
 
             Activated(handIndicator.isLeftHand);
@@ -38,6 +38,7 @@ namespace MonkePhone.Behaviours.UI
             if (TryGetPhoneApp(out IPhoneApp app))
             {
                 app.ButtonClick(this, leftHand);
+
                 return;
             }
 
@@ -45,15 +46,18 @@ namespace MonkePhone.Behaviours.UI
             {
                 case "HomeButton":
                     InvokeMethod(nameof(PhoneManager.SetHome));
+
                     break;
 
                 case "PowerButton":
                     InvokeMethod(nameof(PhoneManager.TogglePower));
+
                     break;
 
                 case "HidePromo":
                     PhoneManager.Instance.watchPromoObject.SetActive(false);
                     PlayerPrefs.SetInt("IgnorePromo", 1);
+
                     break;
             }
         }

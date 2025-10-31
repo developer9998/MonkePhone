@@ -2,18 +2,15 @@
 using MonkePhone.Networking;
 using UnityEngine;
 
-namespace MonkePhone.Patches
+namespace MonkePhone.Patches;
+
+[HarmonyPatch(typeof(RigContainer), nameof(RigContainer.OnDisable))]
+public class RigRemovePatch
 {
-    [HarmonyPatch(typeof(RigContainer), nameof(RigContainer.OnDisable))]
-    public class RigRemovePatch
+    [HarmonyWrapSafe]
+    public static void Postfix(RigContainer __instance)
     {
-        [HarmonyWrapSafe]
-        public static void Postfix(RigContainer __instance)
-        {
-            if (__instance.TryGetComponent(out NetworkedPlayer networkedPlayer))
-            {
-                Object.Destroy(networkedPlayer);
-            }
-        }
+        if (__instance.TryGetComponent(out NetworkedPlayer networkedPlayer))
+            Object.Destroy(networkedPlayer);
     }
 }

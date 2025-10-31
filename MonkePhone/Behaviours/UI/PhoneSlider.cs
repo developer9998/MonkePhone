@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
 #if PLUGIN
 using System;
 using MonkePhone.Interfaces;
@@ -10,14 +9,7 @@ namespace MonkePhone.Behaviours.UI
 {
     public class PhoneSlider : PhoneUIObject
     {
-        public float Value
-        {
-            get => Parameters.z;
-            set => Parameters.z = Mathf.InverseLerp(Parameters.x, Parameters.y, value);
-        }
-
-        [Tooltip("x=min, y=max, z=current")]
-        public Vector3 Parameters = Vector3.zero;
+        [Tooltip("x=min, y=max, z=current")] public Vector3 Parameters = Vector3.zero;
 
         [Tooltip("How much pieces the slider is split up into")]
         public int Split = 10;
@@ -28,8 +20,13 @@ namespace MonkePhone.Behaviours.UI
 
         public Transform Slider, ExtentLeft, ExtentRight;
 
-#if PLUGIN
+        public float Value
+        {
+            get => Parameters.z;
+            set => Parameters.z = Mathf.InverseLerp(Parameters.x, Parameters.y, value);
+        }
 
+#if PLUGIN
         private GorillaTriggerColliderHandIndicator _handIndicator;
 
         private const float _debounce = 0.13f;
@@ -45,38 +42,43 @@ namespace MonkePhone.Behaviours.UI
         public void OnDisable()
         {
             if (!_handIndicator)
-            {
                 return;
-            }
 
             OnTriggerExit(_handIndicator.GetComponent<Collider>());
         }
 
         public void UpdatePosition()
         {
-            Slider.transform.localPosition = Vector3.Lerp(ExtentLeft.localPosition, ExtentRight.localPosition, Mathf.InverseLerp(Parameters.x, Parameters.y, Parameters.z));
+            Slider.transform.localPosition =
+                    Vector3.Lerp(ExtentLeft.localPosition, ExtentRight.localPosition,
+                            Mathf.InverseLerp(Parameters.x, Parameters.y, Parameters.z));
+
             UpdateText();
         }
 
         private void UpdateText()
         {
             if (!Text)
-            {
                 return;
-            }
 
             Text.text = string.Format(Format, Math.Round(Value, 2));
         }
 
         public void OnTriggerStay(Collider other)
         {
-            if (!other.TryGetComponent(out GorillaTriggerColliderHandIndicator handIndicator) || _lastActivation + _debounce > Time.realtimeSinceStartup || (!Phone.Held && !Phone.Leviating) || (!Phone.Leviating && handIndicator.isLeftHand == Phone.LeftHand) || (_handIndicator && _handIndicator != handIndicator))
-            {
+            if (!other.TryGetComponent(out GorillaTriggerColliderHandIndicator handIndicator) ||
+                _lastActivation + _debounce > Time.realtimeSinceStartup || !Phone.Held && !Phone.Leviating ||
+                !Phone.Leviating && handIndicator.isLeftHand == Phone.LeftHand ||
+                _handIndicator && _handIndicator != handIndicator)
                 return;
-            }
 
             Vector3 local = transform.InverseTransformPoint(handIndicator.transform.position);
-            float updatedParameter = Mathf.Lerp(Parameters.x, Parameters.y, Mathf.RoundToInt(Mathf.Clamp01((local.x - ExtentLeft.localPosition.x) / (ExtentRight.localPosition.x * 2f)) * (Split - 1)) / (float)(Split - 1));
+            float updatedParameter =
+                    Mathf.Lerp(Parameters.x, Parameters.y,
+                            Mathf.RoundToInt(
+                                    Mathf.Clamp01((local.x - ExtentLeft.localPosition.x) /
+                                                  (ExtentRight.localPosition.x * 2f)) * (Split - 1)) /
+                            (float)(Split - 1));
 
             bool difference = updatedParameter != Value;
 
@@ -102,10 +104,11 @@ namespace MonkePhone.Behaviours.UI
 
         public void OnTriggerExit(Collider other)
         {
-            if (!other.TryGetComponent(out GorillaTriggerColliderHandIndicator handIndicator) || handIndicator != _handIndicator) return;
+            if (!other.TryGetComponent(out GorillaTriggerColliderHandIndicator handIndicator) ||
+                handIndicator != _handIndicator) return;
 
             _lastActivation = Time.realtimeSinceStartup;
-            _handIndicator = null;
+            _handIndicator  = null;
             Adjusted(false);
 
             PhoneManager.Instance.PlaySound("BasicTap");
@@ -114,9 +117,7 @@ namespace MonkePhone.Behaviours.UI
         public void Adjusted(bool isSelected)
         {
             if (TryGetPhoneApp(out IPhoneApp app))
-            {
                 app.SliderUpdated(this, Value, isSelected);
-            }
         }
 #endif
     }

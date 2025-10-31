@@ -15,10 +15,8 @@ namespace MonkePhone.Behaviours.UI
 
         public IPhoneApp GetPhoneApp()
         {
-            if (_phoneApp != default)
-            {
+            if (_phoneApp != default(object))
                 return _phoneApp;
-            }
 
             Transform parent = transform.parent;
 
@@ -27,12 +25,14 @@ namespace MonkePhone.Behaviours.UI
                 if (parent.TryGetComponent(out IPhoneApp app))
                 {
                     _phoneApp = app;
+
                     break;
                 }
 
                 if (parent.GetComponent<Phone>())
                 {
                     Logging.Warning($"PhoneApp not associated with object {name}");
+
                     return null;
                 }
 
@@ -41,6 +41,7 @@ namespace MonkePhone.Behaviours.UI
                 if (!parent)
                 {
                     Logging.Warning($"PhoneApp not associated with object {name}");
+
                     return null;
                 }
             }
@@ -51,7 +52,8 @@ namespace MonkePhone.Behaviours.UI
         public bool TryGetPhoneApp(out IPhoneApp app)
         {
             app = GetPhoneApp();
-            return app != default; // https://docs.unity3d.com/ScriptReference/Object-operator_Object.html
+
+            return app != default(object); // https://docs.unity3d.com/ScriptReference/Object-operator_Object.html
         }
 #endif
     }
