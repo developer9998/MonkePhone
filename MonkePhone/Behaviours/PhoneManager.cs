@@ -153,7 +153,9 @@ namespace MonkePhone.Behaviours
                             _genericWallpaper = t.Find("GenericBackground").GetComponent<RawImage>();
                             _customWallpaper = t.Find("PictureBackground").GetComponent<RawImage>();
                             watchPromoObject = t.Find("InfoWatchPromo").gameObject;
-                            if (PlayerPrefs.GetInt("IgnorePromo", 0) == 1) watchPromoObject.SetActive(false);
+                            DateTime date = DateTime.UtcNow;
+                            string key = $"IgnorePromo{date.Year}{date.Month}";
+                            if (PlayerPrefs.GetInt(key, 0) == 1) watchPromoObject.SetActive(false);
                             break;
 
                         case "WrongVersionScreen":

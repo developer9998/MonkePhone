@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System;
+
 
 #if PLUGIN
 using MonkePhone.Interfaces;
@@ -53,7 +55,9 @@ namespace MonkePhone.Behaviours.UI
 
                 case "HidePromo":
                     PhoneManager.Instance.watchPromoObject.SetActive(false);
-                    PlayerPrefs.SetInt("IgnorePromo", 1);
+                    DateTime date = DateTime.UtcNow;
+                    string key = $"IgnorePromo{date.Year}{date.Month}";
+                    PlayerPrefs.SetInt(key, 1);
                     break;
             }
         }

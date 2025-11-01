@@ -72,8 +72,8 @@ namespace MonkePhone.Behaviours
 
         public void Update()
         {
-            Vector3 currentLeftControllerPosition = GTPlayer.Instance.leftHandFollower.position;
-            Vector3 currentRightControllerPosition = GTPlayer.Instance.rightHandFollower.position;
+            Vector3 currentLeftControllerPosition = GTPlayer.Instance.leftHand.handFollower.position;
+            Vector3 currentRightControllerPosition = GTPlayer.Instance.rightHand.handFollower.position;
             Vector3 currentHandheldPosition = transform.position + transform.rotation * Vector3.zero;
 
             bool leftGrip = ControllerInputPoller.GetGrab(XRNode.LeftHand);
