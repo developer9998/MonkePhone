@@ -67,7 +67,10 @@ namespace MonkePhone.Behaviours
 
             InterpolationTime = 1f;
             State = ObjectGrabbyState.Mounted;
-            transform.SetParent(GorillaTagger.Instance.offlineVRRig.headMesh.transform.parent);
+
+            var rig = GorillaTagger.Instance.offlineVRRig;
+            var ik = rig.myIk ?? rig.GetComponent<GorillaIK>();
+            transform.SetParent(ik.bodyBone.Find("body") ?? ik.bodyBone.GetChild(0));
         }
 
         public void Update()
@@ -239,7 +242,9 @@ namespace MonkePhone.Behaviours
             }
             else
             {
-                transform.SetParent(GorillaTagger.Instance.offlineVRRig.headMesh.transform.parent);
+                var rig = GorillaTagger.Instance.offlineVRRig;
+                var ik = rig.myIk ?? rig.GetComponent<GorillaIK>();
+                transform.SetParent(ik.bodyBone.Find("body") ?? ik.bodyBone.GetChild(0));
                 GrabPosition = transform.localPosition;
                 GrabQuaternion = transform.localRotation;
             }
