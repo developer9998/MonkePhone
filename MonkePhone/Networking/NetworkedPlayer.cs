@@ -1,4 +1,5 @@
-﻿using MonkePhone.Interfaces;
+﻿using ExitGames.Client.Photon;
+using MonkePhone.Interfaces;
 using MonkePhone.Models;
 using MonkePhone.Patches;
 using MonkePhone.Tools;
@@ -47,9 +48,18 @@ namespace MonkePhone.Networking
 
         private Task createPhoneTask;
 
+        private bool _initialized;
+
         public void Start()
         {
-            NetworkHandler.Instance.OnPlayerPropertyChanged += OnPlayerPropertyChanged;
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            if (_initialized) return;
+            _initialized = true;
+
             RigLocalInvisiblityPatch.OnSetInvisibleToLocalPlayer += OnLocalInvisibilityChanged;
 
             if (!HasMonkePhone && Owner is PunNetPlayer punPlayer && punPlayer.PlayerRef is Player playerRef)
@@ -58,7 +68,8 @@ namespace MonkePhone.Networking
 
         public void OnDestroy()
         {
-            NetworkHandler.Instance.OnPlayerPropertyChanged -= OnPlayerPropertyChanged;
+            if (!_initialized) return;
+
             RigLocalInvisiblityPatch.OnSetInvisibleToLocalPlayer -= OnLocalInvisibilityChanged;
 
             if (HasMonkePhone)
@@ -69,35 +80,32 @@ namespace MonkePhone.Networking
             }
         }
 
-        public async void OnPlayerPropertyChanged(NetPlayer player, Dictionary<string, object> properties)
+        public async void OnPlayerPropertyChanged(Hashtable properties)
         {
-            if (player == Owner)
+            if (!_initialized) Initialize();
+
+            if (Phone is null)
             {
-                Logging.Info($"{player.NickName} got properties: {string.Join(", ", properties.Select(prop => $"[{prop.Key}: {prop.Value}]"))}");
-
-                if (Phone is null)
-                {
-                    createPhoneTask ??= CreateMonkePhone();
-                    await createPhoneTask;
-                }
-
-                if (properties.TryGetValue("Grab", out object objectForGrab) && objectForGrab is byte grab)
-                {
-                    GrabData = grab;
-                }
-
-                if (properties.TryGetValue("Zoom", out object objectForZoom) && objectForZoom is float zoom)
-                {
-                    Zoom = zoom;
-                }
-
-                if (properties.TryGetValue("Flip", out object objectForFlipped) && objectForFlipped is bool flip)
-                {
-                    Flipped = flip;
-                }
-
-                ConfigurePhone();
+                createPhoneTask ??= CreateMonkePhone();
+                await createPhoneTask;
             }
+
+            if (properties.TryGetValue("Grab", out object objectForGrab) && objectForGrab is byte grab)
+            {
+                GrabData = grab;
+            }
+
+            if (properties.TryGetValue("Zoom", out object objectForZoom) && objectForZoom is float zoom)
+            {
+                Zoom = zoom;
+            }
+
+            if (properties.TryGetValue("Flip", out object objectForFlipped) && objectForFlipped is bool flip)
+            {
+                Flipped = flip;
+            }
+
+            ConfigurePhone();
         }
 
         private void OnLocalInvisibilityChanged(VRRig targetRig, bool isInvisible)

@@ -5,150 +5,162 @@ using Photon.Realtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
-namespace MonkePhone.Networking
+namespace MonkePhone.Networking;
+
+public class NetworkHandler : MonoBehaviourPunCallbacks
 {
-    public class NetworkHandler : MonoBehaviourPunCallbacks
+    public static NetworkHandler Instance { get; set; }
+
+    public Action<NetPlayer, Hashtable> OnPlayerPropertiesChanged;
+
+    private readonly byte eventCode = 176;
+
+    private readonly int id = StaticHash.Compute(Constants.CustomProperty.GetStaticHash());
+
+    private Hashtable _properties = [];
+    private bool _isPropertiesReady;
+    private float _propertySetTimer;
+
+    private Player[] playerArray;
+
+    public void Awake()
     {
-        public static volatile NetworkHandler Instance;
+        Instance = this;
 
-        public Action<NetPlayer, Dictionary<string, object>> OnPlayerPropertyChanged;
+        PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
 
-        private readonly Dictionary<string, object> properties = [];
-        private bool set_properties = false;
-        private float properties_timer;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new() { { Constants.CustomProperty, Constants.Version } });
+    }
 
-        public void Awake()
+    public void Update()
+    {
+        _propertySetTimer = Mathf.Max(_propertySetTimer - Time.unscaledDeltaTime, 0f);
+
+        if (_isPropertiesReady && _propertySetTimer <= 0)
         {
-            Instance = this;
-        }
+            _isPropertiesReady = false;
+            _propertySetTimer = Constants.NetworkCooldown;
 
-        public void Start()
-        {
-            if (NetworkSystem.Instance && NetworkSystem.Instance is NetworkSystemPUN)
-            {
-                SetProperty("Version", Constants.Version);
-
-                PhotonNetwork.AddCallbackTarget(this);
-                Application.quitting += () => PhotonNetwork.RemoveCallbackTarget(this);
-                return;
-            }
-
-            enabled = false; // either no netsys or not in a pun environment - i doubt fusion will ever come
-        }
-
-        public void FixedUpdate()
-        {
-            properties_timer -= Time.fixedDeltaTime;
-
-            if (set_properties && properties.Count > 0 && properties_timer <= 0)
-            {
-                PhotonNetwork.LocalPlayer.SetCustomProperties(new()
-                {
-                    {
-                        Constants.CustomProperty,
-                        new Dictionary<string, object>(properties)
-                    }
-                });
-
-                set_properties = false;
-                properties_timer = 0.225f;
-            }
-        }
-
-        public void SetProperty(string key, object value)
-        {
-            if (properties.ContainsKey(key))
-            {
-                properties[key] = value;
-                Logging.Info($"Updated network key - {key}: {value}");
-            }
-            else
-            {
-                properties.Add(key, value);
-                Logging.Info($"Added network key - {key}: {value}");
-            }
-            set_properties = true;
-        }
-
-        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
-        {
-            NetPlayer netPlayer = NetworkSystem.Instance.GetPlayer(targetPlayer.ActorNumber);
-
-            if (netPlayer.IsLocal || !VRRigCache.Instance.TryGetVrrig(netPlayer, out RigContainer playerRig) || !playerRig.TryGetComponent(out NetworkedPlayer networkedPlayer))
-                return;
-
-            if (changedProps.TryGetValue(Constants.CustomProperty, out object props_object) && props_object is Dictionary<string, object> properties)
-            {
-                networkedPlayer.HasMonkePhone = true;
-
-                Logging.Info($"Recieved properties from {netPlayer.NickName}: {string.Join(", ", properties.Select(prop => $"[{prop.Key}: {prop.Value}]"))}");
-                OnPlayerPropertyChanged?.Invoke(netPlayer, properties);
-            }
-        }
-
-        /*
-        public async Task RegisterPlayer(NetPlayer player, VRRig rig)
-        {
-            Logging.Info($"RegisterPlayer {player.NickName}");
-
-            if (player.IsLocal) return;
-
-            var prtime_player = player.GetPlayerRef() ?? PhotonNetwork.CurrentRoom?.GetPlayer(player.ActorNumber);
-
-            if (!rig.GetComponent<NetPhone>())
-            {
-                NetPhone phone = rig.gameObject.GetOrAddComponent<NetPhone>();
-                phone.Player = prtime_player;
-                await Task.Delay(200);
-                PropertiesUpdate(player, prtime_player?.CustomProperties ?? []);
-            }
-        }
-
-        public void UnregisterPlayer(VRRig rig)
-        {
-            if (rig.TryGetComponent(out NetPhone phone) && !phone.Player.IsLocal)
-            {
-                Logging.Info($"UnregisterPlayer {phone.Player}");
-
-                Destroy(phone.Phone);
-                Destroy(phone);
-            }
-        }
-
-        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
-        {
-            base.OnPlayerPropertiesUpdate(targetPlayer, changedProps);
-
-            if (targetPlayer.IsLocal) return;
-
-            NetPlayer player = NetworkSystem.Instance.GetPlayer(targetPlayer.ActorNumber);
-            PropertiesUpdate(player, changedProps);
-        }
-
-        private void PropertiesUpdate(NetPlayer player, Hashtable changedProps)
-        {
             try
             {
-                if (player == null) return;
-
-                if (changedProps.TryGetValue(Constants.CustomProperty, out object value) && value is string str)
-                {
-                    PhoneNetworkContent content = str.FromJson<PhoneNetworkContent>();
-                    Logging.Info($"{player.NickName}: hand {content.IsHeld} lev {content.Levitate}");
-                    var rig = GorillaGameManager.StaticFindRigForPlayer(player);
-                    if (rig && rig.TryGetComponent(out NetPhone phone))
-                    {
-                        phone.UpdateNetworkContent(content);
-                    }
-                }
+                SendProperties(_properties, [.. from player in playerArray where IsCompatiblePlayer(player) select player]);
             }
             catch (Exception ex)
             {
-                Logging.Error($"Error when handling updated properties for {player.NickName}: {ex}");
+                Logging.Fatal("NetworkSolution failed to send player properties");
+                Logging.Error(ex);
             }
         }
-        */
+    }
+
+    public void SetProperty(string key, object value)
+    {
+        if (_properties.ContainsKey(key)) _properties[key] = value;
+        else _properties.Add(key, value);
+
+        _isPropertiesReady = PhotonNetwork.InRoom || _isPropertiesReady;
+    }
+
+    public void RemoveProperty(string key)
+    {
+        if (_properties.ContainsKey(key)) _properties.Remove(key);
+
+        _isPropertiesReady = PhotonNetwork.InRoom || _isPropertiesReady;
+    }
+
+    public void SetProperties(Hashtable properties)
+    {
+        _properties = properties;
+
+        _isPropertiesReady = PhotonNetwork.InRoom || _isPropertiesReady;
+    }
+
+    public void NotifyPropertiesRecieved(Player player, Hashtable properties)
+    {
+        Logging.Info($"{player}: {string.Join(", ", properties)}");
+        OnPlayerPropertiesChanged?.Invoke(player, properties);
+    }
+
+    public void SendProperties(Hashtable properties, Player[] targetPlayers)
+    {
+        object[] content = [id, properties];
+
+        RaiseEventOptions raiseEventOptions = new()
+        {
+            TargetActors = [.. from player in targetPlayers select player.ActorNumber]
+        };
+
+        PhotonNetwork.RaiseEvent(eventCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }
+
+    public bool IsCompatiblePlayer(Player player)
+    {
+        return true;
+    }
+
+    public sealed override async void OnJoinedRoom()
+    {
+        base.OnJoinedRoom();
+        playerArray = PhotonNetwork.PlayerListOthers;
+
+        await Task.Delay(PhotonNetwork.GetPing());
+        _isPropertiesReady = true;
+    }
+
+    public sealed override void OnLeftRoom()
+    {
+        base.OnLeftRoom();
+        playerArray = null;
+    }
+
+    public sealed override async void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        base.OnPlayerEnteredRoom(newPlayer);
+        playerArray = PhotonNetwork.PlayerListOthers;
+
+        while (VRRigCache.rigsInUse.All(player => player.Key.ActorNumber != newPlayer.ActorNumber)) await Task.Delay(PhotonNetwork.GetPing());
+
+        try
+        {
+            SendProperties(_properties, [newPlayer]);
+        }
+        catch (Exception ex)
+        {
+            Logging.Fatal("NetworkSolution failed to send player properties");
+            Logging.Error(ex);
+        }
+    }
+
+    public sealed override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        base.OnPlayerLeftRoom(otherPlayer);
+        playerArray = PhotonNetwork.PlayerListOthers;
+    }
+
+    private void OnEvent(EventData data)
+    {
+        if (data.Code != eventCode) return;
+
+        object[] eventData = (object[])data.CustomData;
+
+        if (eventData.Length < 2 || eventData[0] is not int) return;
+
+        int eventId = (int)eventData[0];
+        if (eventId != id) return;
+
+        Player player = PhotonNetwork.CurrentRoom.GetPlayer(data.Sender);
+        NetPlayer netPlayer = NetworkSystem.Instance.GetPlayer(data.Sender);
+        if (player.IsLocal || !VRRigCache.Instance.TryGetVrrig(netPlayer, out RigContainer playerRig) || !playerRig.TryGetComponent(out NetworkedPlayer networkedPlayer)) return;
+
+        if (eventData[1] is Hashtable properties)
+        {
+            networkedPlayer.OnPlayerPropertyChanged(properties);
+            NotifyPropertiesRecieved(player, properties);
+
+            return;
+        }
     }
 }
