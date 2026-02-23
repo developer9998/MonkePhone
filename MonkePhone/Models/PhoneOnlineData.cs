@@ -32,6 +32,7 @@ namespace MonkePhone.Models
         public string fileName;
         public string fileDownloadUrl;
 
+        /*
         public string FilePath => Path.Combine(PhoneManager.Instance.MusicPath, fileName);
         public bool IsDownloaded => File.Exists(FilePath);
 
@@ -67,5 +68,6 @@ namespace MonkePhone.Models
             Downloaded,
             Failed
         }
+        */
     }
 }

@@ -20,7 +20,7 @@ namespace MonkePhone
         /// <summary>
         /// The version of the plugin (formatted into <see cref="System.Version"/>)
         /// </summary>
-        public const string Version = "1.0.7";
+        public const string Version = "1.0.8";
 
         // Assets
 
@@ -34,9 +34,9 @@ namespace MonkePhone
 
         public const string CustomProperty = "MonkePhone"; // monkephone 2025
 
-        public const float PhoneVisibilityDistance = 2f;
+        public const float PhoneVisibilityDistance = 3f;
 
-        public const float NetworkCooldown = 0.35f;
+        public const float NetworkCooldown = 0.5f;
 
         // Camera
 

@@ -92,7 +92,7 @@ namespace MonkePhone.Tools
                 new ConfigDescription("The image resolution used by the phone cameras")
             );
 
-            CameraResolution.SettingChanged += (object sender, System.EventArgs e) =>
+            CameraResolution.SettingChanged += (sender, e) =>
             {
                 var resolution = CameraResolution.Value;
                 PhoneManager.Instance?.GetApp<MonkeGramApp>()?.AdjustCameraQuality((int)resolution);
@@ -105,32 +105,6 @@ namespace MonkePhone.Tools
                 1f,
                 new ConfigDescription("The volume for sound produced by the phone", new AcceptableValueRange<float>(0f, 1f))
             );
-
-            MusicMultiplier = File.Bind
-            (
-                "Auditory",
-                "Music Volume",
-                1f,
-                new ConfigDescription("The volume for music produced by the phone", new AcceptableValueRange<float>(0f, 1f))
-            );
-
-            MusicMultiplier.SettingChanged += (object sender, System.EventArgs e) =>
-            {
-                PhoneManager.Instance?.GetApp<MusicApp>()?.SetVolumeMultiplier(MusicMultiplier.Value);
-            };
-
-            UseSpatialBlend = File.Bind
-            (
-                "Auditory",
-                "Use Spatial Blend",
-                true,
-                new ConfigDescription("If music produced by the phone will be affected by spatialisation calculations")
-            );
-
-            UseSpatialBlend.SettingChanged += (object sender, System.EventArgs e) =>
-            {
-                PhoneManager.Instance?.GetApp<MusicApp>()?.SetSpatialBlend(UseSpatialBlend.Value);
-            };
 
             AutoPowered = File.Bind
             (

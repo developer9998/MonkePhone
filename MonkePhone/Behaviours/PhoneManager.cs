@@ -23,7 +23,6 @@ namespace MonkePhone.Behaviours
         public bool Initialized;
 
         public string PhotosPath => Path.Combine(Paths.BepInExRootPath, "MonkePhone", "Photos");
-        public string MusicPath => Path.Combine(Paths.BepInExRootPath, "MonkePhone", "Music");
         public bool InHomeScreen => _openedApps.Count == 0;
 
         public PhoneOnlineData Data;
@@ -32,6 +31,8 @@ namespace MonkePhone.Behaviours
         public Keyboard Keyboard;
 
         public bool IsPowered = true, IsOutdated;
+
+        public GameObject DummyPhoneAsset;
 
         private readonly List<PhoneApp> _openedApps = [], _storedApps = [];
         private readonly List<Sound> _sounds = [];
@@ -56,11 +57,6 @@ namespace MonkePhone.Behaviours
             if (!Directory.Exists(PhotosPath))
             {
                 Directory.CreateDirectory(PhotosPath);
-            }
-
-            if (!Directory.Exists(MusicPath))
-            {
-                Directory.CreateDirectory(MusicPath);
             }
 
             await Initialize();
@@ -137,7 +133,7 @@ namespace MonkePhone.Behaviours
             Logging.Info("Starting init");
             try
             {
-                await AssetLoader.LoadAsset<GameObject>(Constants.NetPhoneName);
+                DummyPhoneAsset = await AssetLoader.LoadAsset<GameObject>(Constants.NetPhoneName); // preloads dummy phone
 
                 GameObject phoneObject = Instantiate(await AssetLoader.LoadAsset<GameObject>(Constants.LocalPhoneName));
                 Phone = phoneObject.AddComponent<Phone>();
@@ -242,7 +238,7 @@ namespace MonkePhone.Behaviours
                 //idk what this does
             }
 
-            Data.songs.ForEach(song => song.currentState = song.IsDownloaded ? Song.DownloadState.Downloaded : 0);
+            // Data.songs.ForEach(song => song.currentState = song.IsDownloaded ? Song.DownloadState.Downloaded : 0);
 
             try
             {
@@ -290,7 +286,6 @@ namespace MonkePhone.Behaviours
             if (!Initialized || !Phone.InHand) return;
 
             HandleSoundHaptics();
-            HandleMusicHaptics();
         }
 
         public void HandleSoundHaptics()
@@ -309,15 +304,6 @@ namespace MonkePhone.Behaviours
 
                     GorillaTagger.Instance.StartVibration(Phone.InLeftHand, totalLoudness / 8f / 30f, Time.deltaTime);
                 }
-            }
-        }
-
-        public void HandleMusicHaptics()
-        {
-            if (Configuration.MusicHaptics.Value && GetApp<MusicApp>().MusicSource.isPlaying)
-            {
-                float totalLoudness = Mathf.Clamp(GetApp<MusicApp>().MusicSource.GetLoudness(), 0, 30);
-                GorillaTagger.Instance.StartVibration(Phone.InLeftHand, totalLoudness / 8f / 30f, Time.deltaTime);
             }
         }
 

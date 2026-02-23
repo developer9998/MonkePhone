@@ -1,4 +1,6 @@
 ﻿using ExitGames.Client.Photon;
+using GorillaLocomotion;
+using MonkePhone.Behaviours;
 using MonkePhone.Interfaces;
 using MonkePhone.Models;
 using MonkePhone.Patches;
@@ -20,7 +22,7 @@ namespace MonkePhone.Networking
 
         public VRRig Rig;
 
-        public bool InRange => Vector3.Distance(Camera.main.transform.position, transform.position) < 5f;
+        public bool InRange => Vector3.Distance(GTPlayer.Instance.HeadCenterPosition, transform.position) < Constants.PhoneVisibilityDistance;
 
         public bool HasMonkePhone;
 
@@ -46,30 +48,13 @@ namespace MonkePhone.Networking
         private RawImage _background;
         private Camera _camera;
 
-        private Task createPhoneTask;
-
-        private bool _initialized;
-
-        public void Start()
+        public void Awake()
         {
-            Initialize();
-        }
-
-        private void Initialize()
-        {
-            if (_initialized) return;
-            _initialized = true;
-
             RigLocalInvisiblityPatch.OnSetInvisibleToLocalPlayer += OnLocalInvisibilityChanged;
-
-            if (!HasMonkePhone && Owner is PunNetPlayer punPlayer && punPlayer.PlayerRef is Player playerRef)
-                NetworkHandler.Instance.OnPlayerPropertiesUpdate(playerRef, playerRef.CustomProperties);
         }
 
         public void OnDestroy()
         {
-            if (!_initialized) return;
-
             RigLocalInvisiblityPatch.OnSetInvisibleToLocalPlayer -= OnLocalInvisibilityChanged;
 
             if (HasMonkePhone)
@@ -82,12 +67,10 @@ namespace MonkePhone.Networking
 
         public async void OnPlayerPropertyChanged(Hashtable properties)
         {
-            if (!_initialized) Initialize();
-
-            if (Phone is null)
+            if (!HasMonkePhone)
             {
-                createPhoneTask ??= CreateMonkePhone();
-                await createPhoneTask;
+                CreateMonkePhone();
+                HasMonkePhone = true;
             }
 
             if (properties.TryGetValue("Grab", out object objectForGrab) && objectForGrab is byte grab)
@@ -116,9 +99,9 @@ namespace MonkePhone.Networking
             Phone.SetActive(!isInvisible);
         }
 
-        public async Task CreateMonkePhone()
+        public void CreateMonkePhone()
         {
-            Phone = Instantiate(await AssetLoader.LoadAsset<GameObject>(Constants.NetPhoneName));
+            Phone = Instantiate(PhoneManager.Instance.DummyPhoneAsset);
             Phone.SetActive(!Rig.IsInvisibleToLocalPlayer);
             Phone.transform.localEulerAngles = Vector3.zero;
 
@@ -206,7 +189,7 @@ namespace MonkePhone.Networking
 
         public void FixedUpdate()
         {
-            if (Phone is null)
+            if (!HasMonkePhone)
                 return;
 
             if (InRange && !_camera.gameObject.activeSelf)
